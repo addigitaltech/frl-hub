@@ -13,6 +13,7 @@ export const DEFAULT_SETTINGS: Pick<
   | 'defaultTimezone'
   | 'homepageAnnouncement'
   | 'whatsappNumber'
+  | 'whatsappDefaultMsg'
   | 'whatsappEnabled'
 > = {
   orgName: 'FutureReadiness Lab',
@@ -25,6 +26,7 @@ export const DEFAULT_SETTINGS: Pick<
   defaultTimezone: 'Africa/Lagos',
   homepageAnnouncement: null,
   whatsappNumber: null,
+  whatsappDefaultMsg: null,
   whatsappEnabled: false,
 };
 
