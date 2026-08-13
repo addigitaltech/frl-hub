@@ -1,0 +1,660 @@
+// FRL Hub — Foundation schema
+// Scope of this file: auth/RBAC, branding & site settings, social links,
+// feature flags, audit log. Content modules (Journal, Programs, Activities,
+// Events, Team/ID, Resources, etc.) are added in subsequent phases as their
+// own migrations — this keeps each phase reviewable and reversible instead
+// of landing one enormous, unauditable schema.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ---------------------------------------------------------------------------
+// Auth & RBAC
+// ---------------------------------------------------------------------------
+
+enum Role {
+  SUPER_ADMIN
+  MANAGING_EDITOR
+  CONTENT_EDITOR
+  PROGRAM_MANAGER
+  EVENT_MANAGER
+  TEAM_MANAGER
+  COMMUNICATIONS_MANAGER
+}
+
+enum UserStatus {
+  ACTIVE
+  SUSPENDED
+  DEACTIVATED
+}
+
+model User {
+  id           String     @id @default(cuid())
+  name         String
+  email        String     @unique
+  passwordHash String
+  role         Role
+  status       UserStatus @default(ACTIVE)
+  image        String?
+  lastLoginAt  DateTime?
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+
+  auditLogs AuditLog[]
+  articlesAuthored  Article[] @relation("ArticleAuthor")
+  articlesReviewed  Article[] @relation("ArticleReviewer")
+  articlesApproved  Article[] @relation("ArticleApprover")
+  articleVersionsEdited ArticleVersion[]
+  assignedEnquiries Enquiry[]
+
+  @@index([role])
+  @@index([status])
+}
+
+// Server-enforced audit trail for admin actions. Every mutating admin
+// action (create/update/publish/delete/restore/role-change) should write
+// one of these — this is what makes RBAC enforcement checkable later,
+// not just trusted.
+model AuditLog {
+  id         String   @id @default(cuid())
+  actorId    String
+  actor      User     @relation(fields: [actorId], references: [id])
+  action     String // e.g. "settings.branding.update", "user.suspend"
+  entityType String // e.g. "Settings", "User", "Article"
+  entityId   String?
+  metadata   Json?
+  createdAt  DateTime @default(now())
+
+  @@index([actorId])
+  @@index([entityType, entityId])
+  @@index([createdAt])
+}
+
+// ---------------------------------------------------------------------------
+// Branding & Settings (Admin → Settings → Branding)
+// ---------------------------------------------------------------------------
+
+// Singleton row (id is always "default"). Every place that renders the
+// organisation's branding — public site, admin, ID cards, certificates,
+// verification pages, emails — reads from this row instead of a hard-coded
+// asset, so a logo change propagates everywhere automatically.
+model Settings {
+  id String @id @default("default")
+
+  orgName String @default("FutureReadiness Lab")
+  tagline String @default("Preparing young minds for a future that is already here.")
+
+  logoPrimaryUrl String?
+  logoLightUrl   String?
+  logoDarkUrl    String?
+  faviconUrl     String?
+  socialImageUrl String?
+
+  colorPrimary   String @default("#16a34a")
+  colorSecondary String @default("#0f7a35")
+  colorAccent    String @default("#f97316")
+
+  defaultTimezone String @default("Africa/Lagos")
+
+  whatsappNumber      String?
+  whatsappDefaultMsg  String?
+  whatsappEnabled     Boolean @default(false)
+
+  homepageAnnouncement String?
+
+  updatedAt DateTime @updatedAt
+  updatedById String?
+}
+
+enum SocialPlatform {
+  FACEBOOK
+  INSTAGRAM
+  X
+  TIKTOK
+  YOUTUBE
+  LINKEDIN
+  WHATSAPP
+  TELEGRAM
+}
+
+model SocialLink {
+  id        String         @id @default(cuid())
+  platform  SocialPlatform @unique
+  url       String
+  enabled   Boolean        @default(true)
+  order     Int            @default(0)
+  createdAt DateTime       @default(now())
+  updatedAt DateTime       @updatedAt
+
+  @@index([order])
+}
+
+// Lets admins turn whole modules on/off without a deploy (e.g. Volunteer
+// system per spec section 19: "Allow feature flag if the module is not
+// ready for public activation").
+model FeatureFlag {
+  key         String   @id // e.g. "volunteers", "newsletter", "push_notifications"
+  label       String
+  description String?
+  enabled     Boolean  @default(false)
+  updatedAt   DateTime @updatedAt
+}
+
+// ---------------------------------------------------------------------------
+// FRL Journal (spec section 7-10): publishing workflow, scheduling,
+// categories/tags, version history.
+// ---------------------------------------------------------------------------
+
+enum ArticleStatus {
+  DRAFT
+  IN_REVIEW
+  APPROVED
+  SCHEDULED
+  PUBLISHED
+  ARCHIVED
+  TRASHED
+}
+
+model Category {
+  id          String    @id @default(cuid())
+  name        String
+  slug        String    @unique
+  description String?
+  order       Int       @default(0)
+  articles    Article[]
+  createdAt   DateTime  @default(now())
+}
+
+model Tag {
+  id        String    @id @default(cuid())
+  name      String
+  slug      String    @unique
+  articles  Article[]
+  createdAt DateTime  @default(now())
+}
+
+model Article {
+  id      String @id @default(cuid())
+  title   String
+  slug    String @unique
+  excerpt String?
+
+  // Tiptap's native JSON doc, kept as the editable source of truth.
+  contentJson Json?
+  // Server-rendered HTML generated from contentJson at save time — used
+  // for the public page, reading-time calculation, and search indexing,
+  // so the public site never has to render Tiptap JSON itself.
+  contentHtml String?
+
+  featuredImageUrl String?
+  readingTimeMinutes Int @default(0)
+  viewCount          Int @default(0)
+
+  seoTitle       String?
+  seoDescription String?
+
+  status ArticleStatus @default(DRAFT)
+
+  authorId     String
+  author       User    @relation("ArticleAuthor", fields: [authorId], references: [id])
+  reviewedById String?
+  reviewedBy   User?   @relation("ArticleReviewer", fields: [reviewedById], references: [id])
+  approvedById String?
+  approvedBy   User?   @relation("ArticleApprover", fields: [approvedById], references: [id])
+
+  // Scheduling (spec section 9): publishAt drives the auto-publish job in
+  // app/api/cron/publish-scheduled. unpublishAt is honored by the public
+  // read path (a PUBLISHED article past its unpublishAt is treated as not
+  // publicly visible without changing its stored status, preserving history).
+  publishAt   DateTime?
+  unpublishAt DateTime?
+  publishedAt DateTime?
+  archivedAt  DateTime?
+  trashedAt   DateTime?
+
+  categories Category[]
+  tags       Tag[]
+  versions   ArticleVersion[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([status])
+  @@index([publishAt])
+  @@index([authorId])
+}
+
+// Snapshot written on every save so editors can see/restore prior
+// revisions (spec: "Version history").
+model ArticleVersion {
+  id          String   @id @default(cuid())
+  articleId   String
+  article     Article  @relation(fields: [articleId], references: [id], onDelete: Cascade)
+  title       String
+  contentJson Json?
+  contentHtml String?
+  editedById  String
+  editedBy    User     @relation(fields: [editedById], references: [id])
+  createdAt   DateTime @default(now())
+
+  @@index([articleId])
+}
+
+// "If a scheduled job fails: record failure, retry where safe, notify
+// administrator, log the error. Do not silently fail." — this table is
+// what makes that auditable instead of a promise in a comment.
+model ScheduledJobLog {
+  id         String   @id @default(cuid())
+  jobName    String // e.g. "publish-scheduled-articles"
+  entityType String
+  entityId   String
+  success    Boolean
+  error      String?
+  runAt      DateTime @default(now())
+
+  @@index([jobName, runAt])
+}
+
+// ---------------------------------------------------------------------------
+// Programs, Activities, Events (spec sections 11-13)
+// ---------------------------------------------------------------------------
+//
+// Descriptions here are plain text/markdown, not Tiptap JSON like Journal
+// articles — a deliberate scope cut for this phase to move faster. If rich
+// formatting is needed for program/activity/event bodies later, swap the
+// `description String?` field for the same contentJson/contentHtml pair
+// Article uses; nothing else in this phase depends on it staying plain text.
+
+enum ProgramStatus {
+  DRAFT
+  ACTIVE
+  UPCOMING
+  PAUSED
+  COMPLETED
+  ARCHIVED
+}
+
+model Program {
+  id             String        @id @default(cuid())
+  name           String
+  slug           String        @unique
+  description    String?
+  objectives     String?
+  targetAudience String?
+  status         ProgramStatus @default(DRAFT)
+  featuredImageUrl String?
+  registrationUrl  String?
+  startDate      DateTime?
+  endDate        DateTime?
+  seoTitle       String?
+  seoDescription String?
+
+  // Stopping a program preserves its activities/events rather than
+  // cascading deletes — spec section 11: "Do NOT destroy related
+  // activities or reports automatically." Hence no onDelete: Cascade here.
+  activities Activity[]
+  events     Event[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([status])
+}
+
+enum ActivityStatus {
+  DRAFT
+  SCHEDULED
+  PUBLISHED
+  COMPLETED
+  ARCHIVED
+}
+
+model Activity {
+  id          String         @id @default(cuid())
+  title       String
+  slug        String         @unique
+  description String?
+  objectives  String?
+  outcomes    String?
+  date        DateTime?
+  location    String?
+  featuredImageUrl String?
+  status      ActivityStatus @default(DRAFT)
+
+  programId String?
+  program   Program? @relation(fields: [programId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([status])
+  @@index([programId])
+}
+
+enum EventStatus {
+  DRAFT
+  UPCOMING
+  REGISTRATION_OPEN
+  REGISTRATION_CLOSED
+  COMPLETED
+  CANCELLED
+  ARCHIVED
+}
+
+enum EventMode {
+  ONLINE
+  OFFLINE
+  HYBRID
+}
+
+model Event {
+  id          String     @id @default(cuid())
+  title       String
+  slug        String     @unique
+  description String?
+  location    String?
+  mode        EventMode  @default(OFFLINE)
+  capacity    Int?
+  startTime   DateTime?
+  endTime     DateTime?
+  registrationDeadline DateTime?
+  registrationUrl      String?
+  featuredImageUrl     String?
+  status      EventStatus @default(DRAFT)
+
+  programId String?
+  program   Program? @relation(fields: [programId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([status])
+  @@index([programId])
+  @@index([startTime])
+}
+
+
+// ---------------------------------------------------------------------------
+// Team & Digital ID / Verification Centre (spec sections 14-17)
+// ---------------------------------------------------------------------------
+
+enum TeamMemberStatus {
+  PENDING
+  ACTIVE
+  SUSPENDED
+  DEACTIVATED
+  ARCHIVED
+}
+
+model TeamMember {
+  id          String            @id @default(cuid())
+  frlId       String            @unique // e.g. FRL-TEAM-0001, assigned on create
+  fullName    String
+  photoUrl    String?
+  position    String?
+  department  String?
+  bio         String?
+  skills      String[]          @default([])
+  dateJoined  DateTime          @default(now())
+  status      TeamMemberStatus  @default(PENDING)
+  publicProfile Boolean         @default(true)
+  socialLinks Json? // { website, linkedin, twitter, ... } - free-form, small
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([status])
+}
+
+// ---------------------------------------------------------------------------
+// Resource Centre (spec section 20)
+// ---------------------------------------------------------------------------
+
+enum ResourceStatus {
+  DRAFT
+  PUBLISHED
+  ARCHIVED
+}
+
+model Resource {
+  id            String         @id @default(cuid())
+  title         String
+  slug          String         @unique
+  description   String?
+  category      String?
+  fileUrl       String
+  thumbnailUrl  String?
+  author        String?
+  tags          String[]       @default([])
+  downloadCount Int            @default(0)
+  status        ResourceStatus @default(DRAFT)
+  publishAt     DateTime?
+  expiresAt     DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([status])
+}
+
+// ---------------------------------------------------------------------------
+// Opportunities (spec section 21)
+// ---------------------------------------------------------------------------
+
+enum OpportunityStatus {
+  DRAFT
+  PUBLISHED
+  EXPIRED
+  ARCHIVED
+}
+
+model Opportunity {
+  id              String             @id @default(cuid())
+  title           String
+  provider        String?
+  description     String?
+  eligibility     String?
+  deadline        DateTime?
+  location        String?
+  isOnline        Boolean            @default(false)
+  applicationUrl  String?
+  category        String?
+  featured        Boolean            @default(false)
+  status          OpportunityStatus  @default(DRAFT)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([status])
+  @@index([deadline])
+}
+
+// ---------------------------------------------------------------------------
+// FAQ (spec section 22)
+// ---------------------------------------------------------------------------
+
+model Faq {
+  id        String   @id @default(cuid())
+  question  String
+  answer    String
+  category  String?
+  order     Int      @default(0)
+  published Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([published])
+}
+
+// ---------------------------------------------------------------------------
+// Testimonials (spec section 30)
+// ---------------------------------------------------------------------------
+
+enum TestimonialStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+model Testimonial {
+  id           String            @id @default(cuid())
+  name         String
+  role         String?
+  organisation String?
+  photoUrl     String?
+  quote        String
+  videoUrl     String?
+  status       TestimonialStatus @default(PENDING)
+  featured     Boolean           @default(false)
+  createdAt    DateTime          @default(now())
+
+  @@index([status])
+}
+
+// ---------------------------------------------------------------------------
+// Impact metrics (spec section 29)
+// ---------------------------------------------------------------------------
+
+model ImpactMetric {
+  id          String   @id @default(cuid())
+  label       String
+  number      Int
+  suffix      String   @default("+")
+  description String?
+  icon        String?
+  order       Int      @default(0)
+  visible     Boolean  @default(true)
+  period      String?
+  updatedAt   DateTime @updatedAt
+
+  @@index([visible])
+}
+
+// ---------------------------------------------------------------------------
+// Enquiries (Contact) (spec section 27)
+// ---------------------------------------------------------------------------
+
+enum EnquiryStatus {
+  NEW
+  IN_PROGRESS
+  RESOLVED
+  ARCHIVED
+}
+
+model Enquiry {
+  id           String        @id @default(cuid())
+  name         String
+  email        String
+  phone        String?
+  organisation String?
+  subject      String?
+  message      String
+  status       EnquiryStatus @default(NEW)
+  assignedToId String?
+  assignedTo   User?         @relation(fields: [assignedToId], references: [id])
+  createdAt    DateTime      @default(now())
+
+  @@index([status])
+}
+
+// ---------------------------------------------------------------------------
+// School / Partner applications (spec section 28)
+// ---------------------------------------------------------------------------
+
+enum PartnerApplicationStatus {
+  NEW
+  REVIEWING
+  CONTACTED
+  APPROVED
+  REJECTED
+  COMPLETED
+}
+
+model PartnerApplication {
+  id                 String                    @id @default(cuid())
+  organisation       String
+  contactPerson      String
+  email              String
+  phone              String?
+  location           String?
+  organisationType   String?
+  participantCount   Int?
+  interestedProgram  String?
+  preferredDate      DateTime?
+  message            String?
+  status             PartnerApplicationStatus  @default(NEW)
+  createdAt          DateTime                  @default(now())
+
+  @@index([status])
+}
+
+// ---------------------------------------------------------------------------
+// Team applications (Get Involved -> Join Our Team) (spec section 18)
+// ---------------------------------------------------------------------------
+
+enum TeamApplicationStatus {
+  NEW
+  REVIEWING
+  CHANGES_REQUESTED
+  APPROVED
+  REJECTED
+}
+
+model TeamApplication {
+  id            String                @id @default(cuid())
+  fullName      String
+  email         String
+  phone         String?
+  roleAppliedFor String?
+  coverMessage  String?
+  resumeUrl     String?
+  status        TeamApplicationStatus @default(NEW)
+  createdAt     DateTime              @default(now())
+
+  @@index([status])
+}
+
+// ---------------------------------------------------------------------------
+// Newsletter (spec section 23)
+// ---------------------------------------------------------------------------
+
+enum SubscriberStatus {
+  PENDING
+  CONFIRMED
+  UNSUBSCRIBED
+}
+
+model NewsletterSubscriber {
+  id             String            @id @default(cuid())
+  email          String            @unique
+  status         SubscriberStatus  @default(PENDING)
+  confirmToken   String            @unique @default(cuid())
+  unsubscribeToken String          @unique @default(cuid())
+  subscribedAt   DateTime          @default(now())
+  confirmedAt    DateTime?
+  unsubscribedAt DateTime?
+}
+
+enum CampaignStatus {
+  DRAFT
+  SCHEDULED
+  SENT
+}
+
+model NewsletterCampaign {
+  id             String         @id @default(cuid())
+  subject        String
+  contentHtml    String
+  status         CampaignStatus @default(DRAFT)
+  sendAt         DateTime?
+  sentAt         DateTime?
+  recipientCount Int            @default(0)
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+}
