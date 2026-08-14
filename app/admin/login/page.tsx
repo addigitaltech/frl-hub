@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { signIn } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
+import Link from 'next/link';
 
 export default function AdminLogin() {
   const router = useRouter();
@@ -82,6 +83,13 @@ export default function AdminLogin() {
         >
           {loading ? 'Signing in…' : 'Sign in'}
         </button>
+
+        <Link
+          href="/"
+          className="block text-center text-sm text-muted hover:text-frl-green mt-4"
+        >
+          ← Back to website
+        </Link>
       </form>
     </main>
   );
