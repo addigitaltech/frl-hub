@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import { getSettings } from '@/lib/get-settings';
+import { MobileNav } from './mobile-nav';
 
 const PRIMARY_NAV = [
   { href: '/', label: 'Home' },
@@ -31,16 +32,7 @@ export async function SiteHeader({ tagline }: { tagline?: string }) {
             <small>{tagline ?? 'Digital home of ' + settings.orgName}</small>
           </span>
         </Link>
-        <nav className="links">
-          {PRIMARY_NAV.map((item) => (
-            <Link key={item.href} href={item.href}>
-              {item.label}
-            </Link>
-          ))}
-          <Link href="/admin" className="btn primary">
-            Admin
-          </Link>
-        </nav>
+        <MobileNav items={PRIMARY_NAV} />
       </div>
     </header>
   );
