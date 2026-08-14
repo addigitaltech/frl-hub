@@ -26,7 +26,7 @@ export function ImpactAdmin({ items }: { items: M[] }) {
 
       {showForm && (
         <form action={formAction} className="bg-white border border-line rounded-2xl p-5 mb-6 max-w-xl space-y-3">
-          <div className="grid grid-cols-3 gap-3">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
             <div className="field"><label>Label</label><input name="label" required /></div>
             <div className="field"><label>Number</label><input type="number" name="number" required /></div>
             <div className="field"><label>Suffix</label><input name="suffix" defaultValue="+" /></div>

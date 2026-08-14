@@ -23,7 +23,7 @@ export function ContactForm() {
 
       <div className="field"><label>Name</label><input name="name" required /></div>
       <div className="field"><label>Email</label><input type="email" name="email" required /></div>
-      <div className="grid grid-cols-2 gap-3">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
         <div className="field"><label>Phone (optional)</label><input name="phone" /></div>
         <div className="field"><label>Organisation (optional)</label><input name="organisation" /></div>
       </div>

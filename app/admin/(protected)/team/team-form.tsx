@@ -33,7 +33,7 @@ export function TeamMemberForm({ member }: { member?: MemberData }) {
         <input name="fullName" defaultValue={member?.fullName} required />
       </div>
 
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div className="field">
           <label>Position</label>
           <input name="position" defaultValue={member?.position ?? ''} />

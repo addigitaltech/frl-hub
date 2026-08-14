@@ -22,7 +22,8 @@ export default async function EventsList() {
         {events.length === 0 ? (
           <p className="p-6 text-sm text-muted">No events yet.</p>
         ) : (
-          <table className="table">
+          <div className="overflow-x-auto">
+            <table className="table">
             <thead><tr><th>Title</th><th>Mode</th><th>Status</th><th>Starts</th></tr></thead>
             <tbody>
               {events.map((e) => (
@@ -35,6 +36,7 @@ export default async function EventsList() {
               ))}
             </tbody>
           </table>
+          </div>
         )}
       </div>
     </div>

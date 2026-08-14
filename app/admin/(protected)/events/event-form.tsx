@@ -47,7 +47,7 @@ export function EventForm({ event, programs }: { event?: EventData; programs: { 
         <textarea name="description" defaultValue={event?.description ?? ''} rows={4} />
       </div>
 
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div className="field">
           <label>Start time</label>
           <input type="datetime-local" name="startTime" defaultValue={toDatetimeInput(event?.startTime ?? null)} />
@@ -58,7 +58,7 @@ export function EventForm({ event, programs }: { event?: EventData; programs: { 
         </div>
       </div>
 
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div className="field">
           <label>Mode</label>
           <select name="mode" defaultValue={event?.mode ?? EventMode.OFFLINE}>
@@ -73,7 +73,7 @@ export function EventForm({ event, programs }: { event?: EventData; programs: { 
         </div>
       </div>
 
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div className="field">
           <label>Capacity</label>
           <input type="number" min={0} name="capacity" defaultValue={event?.capacity ?? ''} />

@@ -22,7 +22,8 @@ export default async function ActivitiesList() {
         {activities.length === 0 ? (
           <p className="p-6 text-sm text-muted">No activities yet.</p>
         ) : (
-          <table className="table">
+          <div className="overflow-x-auto">
+            <table className="table">
             <thead><tr><th>Title</th><th>Program</th><th>Status</th><th>Date</th></tr></thead>
             <tbody>
               {activities.map((a) => (
@@ -35,6 +36,7 @@ export default async function ActivitiesList() {
               ))}
             </tbody>
           </table>
+          </div>
         )}
       </div>
     </div>

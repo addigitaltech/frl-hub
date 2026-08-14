@@ -19,7 +19,7 @@ export function JoinTeamForm() {
       </div>
 
       <div className="field"><label>Full name</label><input name="fullName" required /></div>
-      <div className="grid grid-cols-2 gap-3">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
         <div className="field"><label>Email</label><input type="email" name="email" required /></div>
         <div className="field"><label>Phone</label><input name="phone" /></div>
       </div>

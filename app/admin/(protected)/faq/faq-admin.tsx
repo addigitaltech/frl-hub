@@ -13,7 +13,7 @@ export function FaqAdmin({ items }: { items: FaqData[] }) {
   const [pending, startTransition] = useTransition();
 
   return (
-    <div className="grid grid-cols-2 gap-6">
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
       <div className="bg-white border border-line rounded-2xl overflow-hidden h-fit">
         <div className="p-4 border-b border-line flex items-center justify-between">
           <b className="text-sm">All FAQs</b>

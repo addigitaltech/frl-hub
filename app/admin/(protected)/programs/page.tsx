@@ -26,7 +26,8 @@ export default async function ProgramsList() {
         {programs.length === 0 ? (
           <p className="p-6 text-sm text-muted">No programs yet.</p>
         ) : (
-          <table className="table">
+          <div className="overflow-x-auto">
+            <table className="table">
             <thead>
               <tr><th>Name</th><th>Status</th><th>Updated</th></tr>
             </thead>
@@ -40,6 +41,7 @@ export default async function ProgramsList() {
               ))}
             </tbody>
           </table>
+          </div>
         )}
       </div>
     </div>

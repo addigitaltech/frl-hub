@@ -14,7 +14,7 @@ export function NewsletterAdmin({ campaigns, confirmedCount }: { campaigns: C[];
 
   return (
     <div>
-      <div className="grid grid-cols-2 gap-3 mb-6 max-w-xl">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-6 max-w-xl">
         <div className="rounded-2xl bg-ink text-white p-5">
           <b className="text-3xl block">{confirmedCount}</b>
           <span className="text-[#b8d2c3] text-xs">Confirmed subscribers</span>

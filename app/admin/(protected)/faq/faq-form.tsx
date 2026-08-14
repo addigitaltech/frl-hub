@@ -25,7 +25,7 @@ export function FaqForm({ faq, onDone }: { faq?: FaqData; onDone?: () => void })
         <label>Answer</label>
         <textarea name="answer" defaultValue={faq?.answer} rows={3} required />
       </div>
-      <div className="grid grid-cols-2 gap-3">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
         <div className="field">
           <label>Category</label>
           <input name="category" defaultValue={faq?.category ?? ''} />

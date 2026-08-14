@@ -27,7 +27,7 @@ export function TestimonialAdmin({ items }: { items: T[] }) {
 
       {showForm && (
         <form action={formAction} className="bg-white border border-line rounded-2xl p-5 mb-6 max-w-xl space-y-3">
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
             <div className="field"><label>Name</label><input name="name" required /></div>
             <div className="field"><label>Role</label><input name="role" /></div>
           </div>

@@ -49,7 +49,7 @@ export function ActivityForm({
         <textarea name="description" defaultValue={activity?.description ?? ''} rows={4} />
       </div>
 
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div className="field">
           <label>Objectives</label>
           <textarea name="objectives" defaultValue={activity?.objectives ?? ''} rows={3} />
@@ -60,7 +60,7 @@ export function ActivityForm({
         </div>
       </div>
 
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div className="field">
           <label>Date</label>
           <input type="datetime-local" name="date" defaultValue={toDatetimeInput(activity?.date ?? null)} />

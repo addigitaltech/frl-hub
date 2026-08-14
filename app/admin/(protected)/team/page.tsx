@@ -22,7 +22,8 @@ export default async function TeamList() {
         {members.length === 0 ? (
           <p className="p-6 text-sm text-muted">No team members yet.</p>
         ) : (
-          <table className="table">
+          <div className="overflow-x-auto">
+            <table className="table">
             <thead><tr><th>FRL ID</th><th>Name</th><th>Position</th><th>Status</th></tr></thead>
             <tbody>
               {members.map((m) => (
@@ -35,6 +36,7 @@ export default async function TeamList() {
               ))}
             </tbody>
           </table>
+          </div>
         )}
       </div>
     </div>

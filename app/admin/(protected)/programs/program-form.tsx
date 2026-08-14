@@ -40,7 +40,7 @@ export function ProgramForm({ program }: { program?: ProgramData }) {
       <TA label="Objectives" name="objectives" defaultValue={program?.objectives ?? ''} />
       <TA label="Target audience" name="targetAudience" defaultValue={program?.targetAudience ?? ''} rows={2} />
 
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <F label="Start date" name="startDate" type="date" defaultValue={toDateInput(program?.startDate ?? null)} />
         <F label="End date" name="endDate" type="date" defaultValue={toDateInput(program?.endDate ?? null)} />
       </div>
@@ -48,7 +48,7 @@ export function ProgramForm({ program }: { program?: ProgramData }) {
       <F label="Featured image URL" name="featuredImageUrl" defaultValue={program?.featuredImageUrl ?? ''} />
       <F label="Registration URL" name="registrationUrl" defaultValue={program?.registrationUrl ?? ''} />
 
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <F label="SEO title" name="seoTitle" defaultValue={program?.seoTitle ?? ''} />
         <F label="SEO description" name="seoDescription" defaultValue={program?.seoDescription ?? ''} />
       </div>

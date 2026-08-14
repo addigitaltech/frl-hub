@@ -68,7 +68,8 @@ export default async function JournalList({
         {articles.length === 0 ? (
           <p className="p-6 text-sm text-muted">No articles in this view yet.</p>
         ) : (
-          <table className="table">
+          <div className="overflow-x-auto">
+            <table className="table">
             <thead>
               <tr>
                 <th>Title</th>
@@ -94,6 +95,7 @@ export default async function JournalList({
               ))}
             </tbody>
           </table>
+          </div>
         )}
       </div>
     </div>

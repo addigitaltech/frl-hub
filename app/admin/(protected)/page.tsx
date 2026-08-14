@@ -28,13 +28,13 @@ export default async function AdminDashboard() {
         </div>
       </div>
 
-      <div className="grid grid-cols-4 gap-3 mb-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 md:grid-cols-4 gap-3 mb-6">
         <Stat label="Active admin users" value={teamMemberCount} />
         <Stat label="Published posts" value={publishedCount} />
         <Stat label="Drafts & in review" value={draftCount} />
         <Stat label="Scheduled posts" value={scheduledCount} />
       </div>
-      <div className="grid grid-cols-4 gap-3 mb-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 md:grid-cols-4 gap-3 mb-6">
         <Stat label="Active programs" value={activeProgramCount} />
         <Stat label="Upcoming/open events" value={upcomingEventCount} />
       </div>

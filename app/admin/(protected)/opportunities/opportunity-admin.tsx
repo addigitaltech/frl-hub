@@ -28,13 +28,13 @@ export function OpportunityAdmin({ items }: { items: O[] }) {
       {showForm && (
         <form action={formAction} className="bg-white border border-line rounded-2xl p-5 mb-6 max-w-xl space-y-3">
           <div className="field"><label>Title</label><input name="title" required /></div>
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
             <div className="field"><label>Provider</label><input name="provider" /></div>
             <div className="field"><label>Category</label><input name="category" placeholder="Scholarship, Internship…" /></div>
           </div>
           <div className="field"><label>Description</label><textarea name="description" rows={3} /></div>
           <div className="field"><label>Eligibility</label><textarea name="eligibility" rows={2} /></div>
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
             <div className="field"><label>Deadline</label><input type="date" name="deadline" /></div>
             <div className="field"><label>Location</label><input name="location" /></div>
           </div>

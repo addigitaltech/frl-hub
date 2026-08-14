@@ -20,15 +20,15 @@ export function PartnerForm() {
 
       <div className="field"><label>Organisation / school name</label><input name="organisation" required /></div>
       <div className="field"><label>Contact person</label><input name="contactPerson" required /></div>
-      <div className="grid grid-cols-2 gap-3">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
         <div className="field"><label>Email</label><input type="email" name="email" required /></div>
         <div className="field"><label>Phone</label><input name="phone" /></div>
       </div>
-      <div className="grid grid-cols-2 gap-3">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
         <div className="field"><label>Location</label><input name="location" /></div>
         <div className="field"><label>Organisation type</label><input name="organisationType" placeholder="Secondary school, NGO…" /></div>
       </div>
-      <div className="grid grid-cols-2 gap-3">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
         <div className="field"><label>Number of students/participants</label><input type="number" name="participantCount" /></div>
         <div className="field"><label>Preferred date</label><input type="date" name="preferredDate" /></div>
       </div>

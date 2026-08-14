@@ -29,7 +29,7 @@ export function ResourceAdmin({ items }: { items: R[] }) {
         <form action={formAction} className="bg-white border border-line rounded-2xl p-5 mb-6 max-w-xl space-y-3">
           <div className="field"><label>Title</label><input name="title" required /></div>
           <div className="field"><label>Description</label><textarea name="description" rows={3} /></div>
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
             <div className="field"><label>Category</label><input name="category" /></div>
             <div className="field"><label>Author</label><input name="author" /></div>
           </div>

@@ -76,12 +76,12 @@ export function ArticleForm({
         />
       </div>
 
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <TaxonomyPicker label="Categories" name="categoryIds" items={categories} selected={selectedCategories} onChange={setSelectedCategories} />
         <TaxonomyPicker label="Tags" name="tagIds" items={tags} selected={selectedTags} onChange={setSelectedTags} />
       </div>
 
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
           <label className="block text-sm font-bold mb-1" htmlFor="seoTitle">SEO title</label>
           <input id="seoTitle" name="seoTitle" maxLength={70} defaultValue={article?.seoTitle ?? ''} className="w-full border border-line rounded-lg px-3 py-2" />

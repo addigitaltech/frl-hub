@@ -34,7 +34,7 @@ export function BrandingForm({ settings }: { settings: Settings | null }) {
         <input id="favicon" name="favicon" type="file" accept="image/png,image/x-icon,image/svg+xml" />
       </div>
 
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <Field label="Organisation name" name="orgName" defaultValue={settings?.orgName ?? 'FutureReadiness Lab'} />
         <Field label="Default timezone" name="defaultTimezone" defaultValue={settings?.defaultTimezone ?? 'Africa/Lagos'} />
       </div>
@@ -51,7 +51,7 @@ export function BrandingForm({ settings }: { settings: Settings | null }) {
         defaultValue={settings?.homepageAnnouncement ?? ''}
       />
 
-      <div className="grid grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <ColorField label="Primary colour" name="colorPrimary" defaultValue={settings?.colorPrimary ?? '#16a34a'} />
         <ColorField label="Secondary colour" name="colorSecondary" defaultValue={settings?.colorSecondary ?? '#0f7a35'} />
         <ColorField label="Accent colour" name="colorAccent" defaultValue={settings?.colorAccent ?? '#f97316'} />

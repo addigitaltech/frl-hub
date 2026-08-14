@@ -12,7 +12,7 @@ export function TaxonomyForms({
   tags: { id: string; name: string }[];
 }) {
   return (
-    <div className="grid grid-cols-2 gap-6 max-w-3xl">
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-3xl">
       <Panel title="Categories" items={categories} action={createCategory} />
       <Panel title="Tags" items={tags} action={createTag} />
     </div>

@@ -1,10 +1,8 @@
 import { getServerSession } from 'next-auth';
 import { redirect } from 'next/navigation';
-import Image from 'next/image';
-import Link from 'next/link';
 import { authOptions } from '@/lib/auth';
 import { hasPermission, Capability } from '@/lib/rbac';
-import { SignOutButton } from './sign-out-button';
+import { AdminSidebar } from './admin-sidebar';
 
 type NavItem = { href: string; label: string; requires?: Capability };
 
@@ -43,38 +41,9 @@ export default async function AdminLayout({ children }: { children: React.ReactN
   const visibleNav = NAV.filter((item) => !item.requires || hasPermission(user.role, item.requires));
 
   return (
-    <div className="min-h-screen bg-[#f3f6f4]">
-      <div className="grid grid-cols-[250px_1fr] min-h-screen">
-        <aside className="bg-ink text-white p-6 sticky top-0 h-screen">
-          <Image src="/frl-logo.jpg" alt="FRL" width={44} height={44} className="rounded-lg bg-white" />
-          <h3 className="mt-3 font-extrabold">FRL Hub</h3>
-          <p className="text-xs text-[#b8d2c3]">Administration</p>
-
-          <nav className="mt-6 space-y-1">
-            {visibleNav.map((item) => (
-              <Link
-                key={item.href}
-                href={item.href}
-                className="block px-3 py-2.5 rounded-lg text-[#c9ddd1] hover:bg-[#173624] hover:text-white text-sm font-medium"
-              >
-                {item.label}
-              </Link>
-            ))}
-          </nav>
-
-          <div className="mt-8 pt-4 border-t border-white/10 text-xs text-[#b8d2c3]">
-            <p className="font-bold text-white">{user.name}</p>
-            <p>{user.role.replace(/_/g, ' ')}</p>
-          </div>
-
-          <Link href="/" className="block mt-3 text-[#b8d2c3] hover:text-white text-sm">
-            ← View website
-          </Link>
-          <SignOutButton />
-        </aside>
-
-        <main className="p-8">{children}</main>
-      </div>
+    <div className="min-h-screen bg-[#f3f6f4] md:grid md:grid-cols-[250px_1fr]">
+      <AdminSidebar navItems={visibleNav} user={{ name: user.name, role: user.role }} />
+      <main className="p-4 md:p-8">{children}</main>
     </div>
   );
 }
